@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -341,7 +342,7 @@ function SidebarHeader({className, ...props}: React.ComponentProps<"div">) {
       className={cn("flex flex-col gap-2 p-2", className)}
       {...props}
     >
-      <div className={"flex items-center gap-3 rounded-[12px] bg-[#F7F2FA] shadow p-3"}>
+      <Link href={"/profile"} className={"flex items-center gap-3 rounded-[12px] bg-[#F7F2FA] shadow p-3"}>
         <Avatar>
           <AvatarImage src={""} alt="@shadcn"/>
           <AvatarFallback>U</AvatarFallback>
@@ -350,7 +351,7 @@ function SidebarHeader({className, ...props}: React.ComponentProps<"div">) {
           <h3 className={"text-lg font-[500] leading-6 tracking-tight"}>{"Username"}</h3>
           <p className={"text-sm font-normal leading-5 tracking-tight"}>{"user.role"}</p>
         </div>
-      </div>
+      </Link>
     </div>
   )
 }
@@ -479,7 +480,7 @@ function SidebarMenuItem({className, ...props}: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item relative rounded-full hover:bg-[#E8DEF8] flex gap-x-3 cursor-pointer font-semibold text-[#4A4459] pl-[16px] py-[10px]", className)}
+      className={cn("group/menu-item relative rounded-full hover:outline-1 hover:outline-[#E8DEF8] flex gap-x-3 cursor-pointer font-semibold text-[#4A4459] pl-[16px] py-[10px]", className)}
       {...props}
     />
   )

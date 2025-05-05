@@ -1,4 +1,4 @@
-import "./globals.css"
+import "../globals.css"
 
 export const metadata = {
   title: 'Next.js',
@@ -6,13 +6,13 @@ export const metadata = {
 }
 
 export default function RootLayout({
-                                     children,
-                                   }: {
+  children,
+}: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-    <body>{children}</body>
-    </html>
+    <div className={"w-full"}>
+      {children}
+    </div>
   )
 }
