@@ -2,29 +2,18 @@
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeftIcon } from "lucide-react"
+import { cva, VariantProps } from "class-variance-authority"
+import { PanelLeftIcon, User } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from "@/components/ui/tooltip"
+import { Avatar } from "@/components/ui/avatar";
 import Link from "next/link";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
@@ -343,13 +332,11 @@ function SidebarHeader({className, ...props}: React.ComponentProps<"div">) {
       {...props}
     >
       <Link href={"/profile"} className={"flex items-center gap-3 rounded-[12px] bg-[#F7F2FA] shadow p-3"}>
-        <Avatar>
-          <AvatarImage src={""} alt="@shadcn"/>
-          <AvatarFallback>U</AvatarFallback>
+        <Avatar className={"flex items-center justify-center"}>
+          <User />
         </Avatar>
         <div className={"flex flex-col flex-1 cursor-pointer"}>
-          <h3 className={"text-lg font-[500] leading-6 tracking-tight"}>{"Username"}</h3>
-          <p className={"text-sm font-normal leading-5 tracking-tight"}>{"user.role"}</p>
+          <h3 className={"text-lg font-[500] leading-6 tracking-tight"}>Профиль</h3>
         </div>
       </Link>
     </div>

@@ -3,53 +3,28 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { HousePlus, LogIn, LogOut, UserRoundPlus, UserRoundX } from "lucide-react";
+import { Copy, HousePlus, LogIn, LogOut } from "lucide-react";
 import API from "@/lib/axios";
 import { Roles } from "@/lib/roles";
 import Image from "next/image";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from "@radix-ui/react-dialog";
-
-const requests = [
-  // example requests, can be fetched from API as well
-  {
-    id: 1,
-    company: {
-      id: 1,
-      name: "SOme Company",
-    },
-    user: {
-      name: "Adil Adilov",
-    },
-    status: 'approved',
-  },
-  {
-    id: 2,
-    company: {
-      id: 1,
-      name: "Other Company",
-    },
-    user: {
-      name: "Adil Adilov",
-    },
-    status: 'rejected',
-  },
-  {
-    id: 3,
-    company: {
-      id: 1,
-      name: "New Company",
-    },
-    user: {
-      name: "Adil Adilov",
-    },
-    status: 'pending',
-  }
-]
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger
+} from "@radix-ui/react-dialog";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { toast } from "sonner";
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [joinCode, setJoinCode] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>("");
+  const [companyDescription, setCompanyDescription] = useState<string>("");
 
   const fetchUserProfile = async () => {
     try {
@@ -63,14 +38,63 @@ const ProfilePage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
   const handleLogout = () => {
     localStorage.removeItem("doc-flow-access-token");
     window.location.href = "/login";
   };
+
+  const createCompany = async () => {
+    try {
+      await API.post("/company/create", {
+        name: companyName,
+        description: companyDescription,
+      });
+      await fetchUserProfile();
+    } catch (error: any) {
+      setError("Error creating company.");
+      console.error("Error creating company", error);
+    }
+  };
+
+  const joinCompany = async () => {
+    try {
+      await API.post(`/company/${joinCode}/join`);
+      toast.success("Successfully joined the company!");
+      await fetchUserProfile(); // Refresh profile to get new company info
+    } catch (error: any) {
+      toast.error("Неправильный код или что то пошло не так")
+      console.error("Error joining company", error);
+    }
+  };
+
+  const handleCopyToClipboard = () => {
+    const joinCode = userProfile?.company?.joinCode.toUpperCase();
+    console.log(joinCode)
+    if (joinCode) {
+      navigator.clipboard.writeText(joinCode)
+        .then(() => {
+          toast.success("Код скопирован", {
+          })
+        })
+        .catch((err) => {
+          console.error("Error copying text: ", err);
+        });
+    }
+  };
+
+  const handleLeaveCompany = async () => {
+    try {
+      await API.post(`/company/${userProfile.company.id}/leave`);
+      await fetchUserProfile();
+    } catch (error) {
+      console.error("Error leaving company:", error);
+      toast.error("Ошибка при выходе из компании");
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -79,20 +103,25 @@ const ProfilePage = () => {
     <div className="w-full flex flex-col gap-y-5 p-5">
       {/* USER INFO */}
       <div className="w-full flex justify-between">
-        <div className="flex items-center gap-5">
-          <Avatar>
-            <AvatarImage src={userProfile?.avatar || ""} alt={userProfile?.username} />
-            <AvatarFallback>{userProfile?.firstName?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col flex-1 cursor-pointer">
-            <h3 className="text-lg font-[500] leading-6 tracking-tight">
-              {userProfile?.firstName} {userProfile?.lastName}
-            </h3>
-            <p className="text-sm font-normal leading-5 tracking-tight">
-              {Roles[userProfile?.role as keyof typeof Roles]} {/* Type assertion */}
-            </p>
+        <div className={"flex gap-5 items-center"}>
+          <SidebarTrigger/>
+
+          <div className="flex items-center gap-5">
+            <Avatar>
+              <AvatarImage src={userProfile?.avatar || ""} alt={userProfile?.username} />
+              <AvatarFallback>{userProfile?.firstName?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col flex-1 cursor-pointer">
+              <h3 className="text-lg font-[500] leading-6 tracking-tight">
+                {userProfile?.firstName} {userProfile?.lastName}
+              </h3>
+              <p className="text-sm font-normal leading-5 tracking-tight">
+                {Roles[userProfile?.role as keyof typeof Roles]}
+              </p>
+            </div>
           </div>
         </div>
+
         <div className="flex gap-5">
           <Button variant="outline" className="bg-[#FEF7FF] font-normal w-fit" onClick={handleLogout}>
             Выйти <LogOut />
@@ -100,10 +129,10 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className={"flex gap-8"}>
+      <div className={"flex flex-wrap gap-8"}>
         {/* COMPANY INFO */}
         {userProfile.company ? (
-          <div className="border p-4 rounded-xl h-fit shadow bg-white flex-1 space-y-3">
+          <div className="border p-4 rounded-xl h-fit min-w-sm shadow bg-white flex-1 space-y-3">
             <h4 className="text-md font-semibold">Ваша компания</h4>
             <Image src={"/imgs/card_thumbnail.png"} alt={"Logo"} className="object-cover rounded-lg w-full h-42"
                    width={300}
@@ -114,13 +143,26 @@ const ProfilePage = () => {
             <p className="text-sm text-gray-600">
               {userProfile.company.description}
             </p>
+
+            <div className={"w-full flex items-center justify-between"}>
+              <div>
+                 Код компании:
+                <div className={"p-2 rounded-md flex items-end justify-center gap-5 border border-[#] hover:bg-[#FEF7FF]"}>
+                  {userProfile.company.joinCode.toUpperCase()}
+                  <Copy width={20} height={20} className={"cursor-pointer"} onClick={handleCopyToClipboard}/>
+                </div>
+              </div>
+              <Button variant="outline" className="bg-[#FFDDDD]/30 text-red-500" onClick={handleLeaveCompany}>
+                Покинуть компанию
+              </Button>
+            </div>
           </div>
         ) : (
           <>
             {/* NO COMPANY - JOIN OR CREATE */}
             <Dialog>
               <DialogTrigger asChild>
-                <div className="border hover:border-[#685DFF] cursor-pointer p-4 rounded-xl shadow bg-white flex flex-col items-center justify-center text-[#685DFF] space-y-5 flex-1">
+                <div className="border hover:border-[#685DFF] text-center min-w-xs cursor-pointer p-4 rounded-xl shadow bg-white flex flex-col items-center justify-center text-[#685DFF] space-y-5 flex-1">
                   <LogIn className={"w-10 h-10"} />
                   <h4 className="text-md font-semibold mb-2">Присоединиться к компании</h4>
                 </div>
@@ -130,20 +172,25 @@ const ProfilePage = () => {
                   <DialogTitle><strong>Присоединение к компании</strong></DialogTitle>
                   <DialogDescription>
                     Введите код компании для присоединения:
-                    <input type="text" placeholder="Введите код компании" className="border px-3 py-2 rounded w-full" />
-                    <Button className="mt-2 w-full">Отправить заявку</Button>
+                    <input
+                      type="text"
+                      placeholder="Введите код компании"
+                      className="border px-3 py-2 rounded w-full"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value)}
+                    />
+                    <Button className="mt-2 w-full" onClick={joinCompany}>Отправить заявку</Button>
                   </DialogDescription>
                   <DialogClose asChild>
                     <Button className="mt-2 w-full" variant={"ghost"}>Закрыть</Button>
                   </DialogClose>
                 </div>
-
               </DialogContent>
             </Dialog>
 
             <Dialog>
               <DialogTrigger asChild>
-                <div className="border hover:border-[#685DFF] cursor-pointer p-4 rounded-xl shadow bg-white flex flex-col items-center justify-center text-[#685DFF] space-y-5 flex-1">
+                <div className="border hover:border-[#685DFF] text-center min-w-xs cursor-pointer p-4 rounded-xl shadow bg-white flex flex-col items-center justify-center text-[#685DFF] space-y-5 flex-1">
                   <HousePlus className={"w-10 h-10"} />
                   <h4 className="text-md font-semibold mb-2">Создать свою компанию</h4>
                 </div>
@@ -153,9 +200,20 @@ const ProfilePage = () => {
                   <DialogTitle><strong>Создание компании</strong></DialogTitle>
                   <DialogDescription>
                     Введите название и описание компании:
-                    <input type="text" placeholder="Название компании" className="border px-3 py-2 rounded w-full mb-2" />
-                    <textarea placeholder="Описание" className="border px-3 py-2 rounded w-full" />
-                    <Button className="mt-2 w-full">Создать</Button>
+                    <input
+                      type="text"
+                      placeholder="Название компании"
+                      className="border px-3 py-2 rounded w-full mb-2"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                    />
+                    <textarea
+                      placeholder="Описание"
+                      className="border px-3 py-2 rounded w-full"
+                      value={companyDescription}
+                      onChange={(e) => setCompanyDescription(e.target.value)}
+                    />
+                    <Button className="mt-2 w-full" onClick={createCompany}>Создать</Button>
                   </DialogDescription>
                   <DialogClose asChild>
                     <Button className="mt-2 w-full" variant={"ghost"}>Закрыть</Button>
@@ -164,31 +222,6 @@ const ProfilePage = () => {
               </DialogContent>
             </Dialog>
           </>
-        )}
-
-        {/* JOIN REQUESTS */}
-        {requests?.length > 0 && (
-          <div className=" flex-1">
-            <h4 className="text-md font-semibold mb-2 border rounded-xl shadow p-4 bg-white">Ваши заявки на вступление</h4>
-            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ">
-              {requests.map((req: any) => (
-                <li key={req.id} className={"flex items-center justify-between hover:rounded-xl p-4 hover:bg-gray-300/50 "}>
-                  <h3 className={"text-md"}>
-                    В компанию <strong>{req.company.name}</strong>
-                  </h3>
-                  <p>от {req.user.name}</p>
-                  <div className={"flex gap-4"}>
-                    <div className={"p-2 w-8 h-8 rounded-full border flex items-center justify-center bg-white cursor-pointer"}>
-                      <UserRoundPlus color={"green"} className={"w-6 h-6"} />
-                    </div>
-                    <div className={"p-2 rounded-full w-8 h-8 border flex items-center justify-center bg-white cursor-pointer"}>
-                      <UserRoundX color={"red"} className={"w-6 h-6"} />
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
         )}
       </div>
     </div>

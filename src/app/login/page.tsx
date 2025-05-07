@@ -14,7 +14,9 @@ export default function LoginPage() {
   const handleLogin = async (data: { email: string; password: string }) => {
     setErrorMessage(null); // Сбрасываем сообщение об ошибке при новом запросе
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,6 +29,7 @@ export default function LoginPage() {
         // Успешный логин
         console.log("Login successful:", result);
         localStorage.setItem("doc-flow-access-token", result.accessToken); // Сохраняем токен в localStorage
+        localStorage.setItem("doc-flow-refresh-token", result.refreshToken); // Сохраняем токен в localStorage
         router.push("/profile"); // Перенаправление на главную страницу
       } else {
         // Если ошибка, отображаем ее

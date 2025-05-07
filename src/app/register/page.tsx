@@ -13,7 +13,9 @@ export default function LoginPage() {
   const handleLogin = async (data: { email: string; password: string }) => {
     setErrorMessage(null); // Сбрасываем сообщение об ошибке при новом запросе
     try {
-      const response = await fetch("http://localhost:8080/auth/register", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(`${baseUrl}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

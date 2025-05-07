@@ -100,7 +100,8 @@ export default function Home() {
     setIsLoading(true);
     // Call the backend API
     try {
-      const response = await fetch("http://localhost:8080/documents/analyze", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${baseUrl}/documents/analyze`, {
         method: "POST",
         body: formData,
       });
