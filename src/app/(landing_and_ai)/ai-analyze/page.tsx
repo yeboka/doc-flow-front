@@ -120,7 +120,7 @@ export default function Home() {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during API call:", error);
     } finally {
       setIsLoading(false);

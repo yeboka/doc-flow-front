@@ -4,12 +4,12 @@ import { DocumentViewer } from "react-documents";
 import Link from "next/link"; // Import pdfjs from react-pdf
 
 interface DocumentCardProps {
+  id: number;
   title: string;
-  subtitle: string;
   fileUrl?: string;
 }
 
-const DocumentCard: React.FC<DocumentCardProps> = ({ subtitle, title, fileUrl }) => {
+const DocumentCard: React.FC<DocumentCardProps> = ({ id, title, fileUrl }) => {
   const isPdf = fileUrl?.endsWith('.pdf');
 
   return (
@@ -33,15 +33,15 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ subtitle, title, fileUrl })
           />
         )}
       </div>
-      <Link href={"/docs/1"} className={"flex w-full items-center gap-3 p-2 bg-[#FEF7FF]"} >
+      <Link href={`/docs/${id}`} className={"flex w-full items-center gap-3 p-2 bg-[#FEF7FF]"} >
         <div className={"flex items-center justify-center w-[48px] h-[48px] rounded-[12px] bg-[#FFCDD4]"}>
           <Image src={"icons/document_icon.svg"} alt={"options"} width={24} height={24} />
         </div>
         <div className={"flex flex-col flex-1 cursor-pointer"}>
           <h3 className={"text-lg font-medium leading-6 tracking-tight"}>{title}</h3>
-          <p className={"text-sm font-normal leading-5 tracking-tight"}>{subtitle}</p>
+          {/*<p className={"text-sm font-normal leading-5 tracking-tight"}>{subtitle}</p>*/}
         </div>
-        <Image src={"icons/options_icon.svg"} alt={"options"} width={24} height={24} />
+        {/*<Image src={"icons/options_icon.svg"} alt={"options"} width={24} height={24} />*/}
       </Link>
     </div>
   );

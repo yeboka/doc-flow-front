@@ -1,21 +1,15 @@
+"use client";
+
 import "../globals.css"
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Provider } from 'react-redux';
+import { store } from '@/lib/store';
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-//
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
-
-export const metadata = {
-  title: "DataFlow",
-  description: 'DataFlow',
-}
+// export const metadata = {
+//   title: "DataFlow",
+//   description: 'DataFlow',
+// }
 
 export default function RootLayout({
                                      children,
@@ -24,10 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <div>
-      <SidebarProvider>
-        <AppSidebar/>
-        {children}
-      </SidebarProvider>
+      <Provider store={store}>
+        <SidebarProvider>
+          <AppSidebar/>
+          {children}
+        </SidebarProvider>
+      </Provider>
     </div>
   );
 }

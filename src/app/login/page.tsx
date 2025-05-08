@@ -35,7 +35,7 @@ export default function LoginPage() {
         // Если ошибка, отображаем ее
         setErrorMessage(result.message || "Ошибка входа"); // Устанавливаем ошибку
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during login:", error);
       setErrorMessage("Произошла ошибка при входе. Попробуйте позже.");
     }
