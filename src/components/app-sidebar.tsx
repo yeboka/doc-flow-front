@@ -8,7 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { File, Inbox, LayoutDashboard, SquareUser } from "lucide-react";
+import { BotMessageSquare, File, Inbox, LayoutDashboard, SquareUser } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import * as React from "react";
@@ -26,7 +26,7 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { data: userProfile, loading, error } = useAppSelector((state) => state.profile);
+  const {data: userProfile, loading, error} = useAppSelector((state) => state.profile);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -40,19 +40,32 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader/>
       <SidebarContent>
-        {userProfile?.company && <SidebarMenu className={"p-3"}>
-          {navItems.map((item) => {
-            const isActive = pathname === item.path
-            return (
-              <Link href={item.path} key={item.path}>
-                <SidebarMenuItem className={`${isActive ? "bg-[#E8DEF8] font-semibold" : ""}`}>
-                  {item.icon}
-                  {item.name}
-                </SidebarMenuItem>
-              </Link>
-            )
-          })}
-        </SidebarMenu>}
+        {userProfile?.company &&
+            <SidebarMenu className={"p-3"}>
+
+                <Link href={"/ai-chat"}>
+                    <SidebarMenuItem
+                        className={`mb-4 font-semibold bg-gradient-to-r p-[1px] from-[#9B4DFF] via-[#6F4FF0] to-[#3F39F8]  `}
+                    >
+                        <div className={`w-full h-full flex items-center justify-start p-2 px-3 rounded-full gap-3 ${pathname === "/ai-chat" ? "bg-[#E8DEF8]" : "bg-sidebar"} `}>
+                          <BotMessageSquare width={24} height={24}/>
+                          AI chat
+                        </div>
+                    </SidebarMenuItem>
+                </Link>
+
+              {navItems.map((item) => {
+                return (
+                  <Link href={item.path} key={item.path}>
+                    <SidebarMenuItem className={`${pathname === item.path ? "bg-[#E8DEF8] font-semibold" : ""}`}>
+                      {item.icon}
+                      {item.name}
+                    </SidebarMenuItem>
+                  </Link>
+                )
+              })}
+            </SidebarMenu>
+        }
       </SidebarContent>
       <SidebarFooter/>
     </Sidebar>

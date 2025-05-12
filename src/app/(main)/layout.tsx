@@ -3,8 +3,6 @@
 import "../globals.css"
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { Provider } from 'react-redux';
-import { store } from '@/lib/store';
 
 // export const metadata = {
 //   title: "DataFlow",
@@ -18,12 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <div>
-      <Provider store={store}>
-        <SidebarProvider>
-          <AppSidebar/>
-          {children}
-        </SidebarProvider>
-      </Provider>
+      <SidebarProvider>
+        <AppSidebar/>
+        {children}
+      </SidebarProvider>
     </div>
   );
 }

@@ -1,10 +1,13 @@
+"use client";
 import "./globals.css"
 import { Toaster } from "sonner";
+import { store } from "@/lib/store";
+import { Provider } from "react-redux";
 
-export const metadata = {
-  title: 'DataFlow',
-  description: 'Помощник в управлении документами',
-}
+// export const metadata = {
+//   title: 'DataFlow',
+//   description: 'Помощник в управлении документами',
+// }
 
 export default function RootLayout({
                                      children,
@@ -14,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
     <body>
-    {children}
-    <Toaster richColors  />
+    <Provider store={store}>
+      {children}
+    </Provider>
+    <Toaster richColors/>
     </body>
     </html>
   )
