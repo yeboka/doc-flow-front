@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger,
 } from "@radix-ui/react-dialog";
 import { ArrowUpRight, MailOpen, Send, Inbox, Plus } from "lucide-react";
 import { fetchDocuments } from "@/lib/slices/documentsSlice";

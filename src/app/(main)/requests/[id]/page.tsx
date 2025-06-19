@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { DocumentViewer } from 'react-documents';
 import { fetchUserProfile } from '@/lib/slices/profileSlice';
+import { fetchDocuments } from '@/lib/slices/documentsSlice';
+import { fetchUsersInCompany } from '@/lib/slices/companySlice';
 
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-200 text-yellow-800',
@@ -29,10 +31,17 @@ const RequestDetailPage = () => {
   }, []);
 
   useEffect(() => {
-    if (userProfile?.id) {
-      dispatch(fetchRequests(userProfile.id) as any);
+    if (userProfile?.company?.id) {
+      dispatch(fetchDocuments() as any);
+      dispatch(fetchUsersInCompany(userProfile?.company?.id) as any);
     }
-  }, [userProfile?.id]);
+  }, [dispatch, userProfile]);
+
+  useEffect(() => {
+    if (userProfile?.id) {
+      dispatch(fetchRequests(userProfile?.id) as any);
+    }
+  }, [userProfile?.id, dispatch]);
 
   useEffect(() => {
     const found = requests.find((r: any) => r.id == id);

@@ -44,7 +44,7 @@ const Header = () => {
 
   useEffect(() => {
     dispatch(fetchUserProfile() as any);
-  }, []);
+  }, [dispatch]);
 
 
   const toggleMenu = () => {

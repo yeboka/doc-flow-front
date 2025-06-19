@@ -16,6 +16,7 @@ import {
   Users,
   Zap,
 } from "lucide-react"
+import Image from "next/image"
 
 export default function Home() {
   return (
@@ -49,8 +50,8 @@ export default function Home() {
               </div>
               <div className="flex items-center justify-center">
                 <div className="relative aspect-video overflow-hidden rounded-xl border bg-muted md:aspect-square lg:aspect-video">
-                  <img
-                    src="imgs/landing_illustration.png?height=600&width=800"
+                  <Image
+                    src="/imgs/landing_illustration.png"
                     alt="Product screenshot"
                     className="object-cover"
                     width={800}

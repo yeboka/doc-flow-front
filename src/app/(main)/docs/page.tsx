@@ -6,7 +6,6 @@ import { fetchDocuments } from "@/lib/slices/documentsSlice";
 import UploadDialog from "@/components/dialogs/UploadDialog";
 import DocumentCardSkeleton from "@/components/skeletons/DocumentCardSkeleton";
 import EmptyState from "@/components/EmptyState";
-import CreateDocumentButton from "@/components/CreateDocumentButton";
 
 const DocsPage = () => {
   const dispatch = useAppDispatch();
@@ -14,7 +13,7 @@ const DocsPage = () => {
 
   useEffect(() => {
     dispatch(fetchDocuments());
-  }, []);
+  }, [dispatch]);
 
   const handleCreateDocument = () => {
     // UploadDialog уже имеет свой собственный Dialog, поэтому просто показываем его
@@ -62,7 +61,7 @@ const DocsPage = () => {
             />
           ))}
           {/* Кнопка создания документа в списке */}
-          <CreateDocumentButton onSuccess={() => dispatch(fetchDocuments())} />
+          {/* <CreateDocumentButton onSuccess={() => dispatch(fetchDocuments())} /> */}
         </div>
       ) : (
         <EmptyState type="documents" onCreateClick={handleCreateDocument} />

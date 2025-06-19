@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import DocumentCardSkeleton from "@/components/skeletons/DocumentCardSkeleton";
 import { fetchRequests } from "@/lib/slices/requestsSlice";
 import { RootState } from "@/lib/store";
-import { Plus } from "lucide-react";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -64,20 +63,25 @@ export default function Home() {
               <DocumentCardSkeleton />
             </>
           ) : documents.length > 0 ? (
-            documents.map((doc: any) => (
-              <DocumentCard
-                key={doc.id}
-                id={doc.id}
-                title={doc.title}
-                fileUrl={doc.file_url}
-              />
-            ))
+            <>
+              {
+                documents.map((doc: any) => (
+                  <DocumentCard
+                    key={doc.id}
+                    id={doc.id}
+                    title={doc.title}
+                    fileUrl={doc.file_url}
+                  />
+                ))
+              }
+              <Link href="/docs">
+                <Button variant={"outline"} className="bg-[#FEF7FF] font-normal">Показать больше</Button>
+              </Link>
+            </>
+            
           ) : (
             <div className="text-gray-500 italic">Нет доступных документов</div>
           )}
-          <Link href="/docs">
-            <Button variant={"outline"} className="bg-[#FEF7FF] font-normal">Показать больше</Button>
-          </Link>
         </div>
       </section>
 
