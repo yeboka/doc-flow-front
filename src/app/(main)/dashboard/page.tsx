@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import DocumentCard from "@/components/DocumentCard";
@@ -9,20 +10,17 @@ import Link from "next/link";
 import API from "@/lib/axios";
 import { toast } from "sonner";
 import DocumentCardSkeleton from "@/components/skeletons/DocumentCardSkeleton";
+import { fetchRequests } from "@/lib/slices/requestsSlice";
+import { RootState } from "@/lib/store";
+import { Plus } from "lucide-react";
 
 export default function Home() {
+  const dispatch = useDispatch();
+  const { data: userProfile } = useSelector((state: RootState) => state.profile);
+  const { requests, loading: requestsLoading, error: requestsError } = useSelector((state: RootState) => state.requests);
+  
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const requests = [
-    {
-      id: 1,
-      title: "Запрос на больничный",
-      subtitle: "A dialog is a type of modal window...",
-      user: { username: "Username", role: "role" }
-    },
-    // ... другие запросы
-  ];
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -39,6 +37,15 @@ export default function Home() {
 
     fetchDocuments();
   }, []);
+
+  useEffect(() => {
+    if (userProfile?.id) {
+      dispatch(fetchRequests(userProfile.id) as any);
+    }
+  }, [userProfile?.id, dispatch]);
+
+  // Получаем первые 3 запроса
+  const recentRequests = requests ? requests.slice(0, 3) : [];
 
   return (
     <main className="w-[1000px] flex-1">
@@ -77,13 +84,33 @@ export default function Home() {
       <section className="w-full flex flex-col p-5 gap-3">
         <h2 className="text-2xl font-medium py-3">Новые запросы</h2>
         <div className="w-full flex gap-[25px] items-center">
-          {requests.map((item) => (
-            <RequestCard key={item.id} title={item.title} subtitle={item.subtitle} user={item.user} />
-          ))}
+          {requestsLoading ? (
+            <div className="text-gray-500 italic">Загрузка запросов...</div>
+          ) : requestsError ? (
+            <div className="text-red-500 italic">{requestsError}</div>
+          ) : recentRequests.length > 0 ? (
+            recentRequests.map((request: any) => (
+              <RequestCard 
+                key={request.id}
+                id={request.id}
+                title={request.document?.title || "Без названия"} 
+                subtitle={`От: ${request.sender?.firstName} ${request.sender?.lastName}`} 
+                user={{
+                  username: request.sender?.firstName + " " + request.sender?.lastName,
+                  role: request.sender?.role || "Сотрудник",
+                  avatarImg: request.sender?.avatarImg
+                }} 
+              />
+            ))
+          ) : (
+            <div className="text-gray-500 italic">Нет новых запросов</div>
+          )}
         </div>
-        <Link href="/requests">
-          <Button variant={"outline"} className="bg-[#FEF7FF] font-normal w-fit">Показать больше</Button>
-        </Link>
+        {requests && requests.length > 3 && (
+          <Link href="/requests">
+            <Button variant={"outline"} className="bg-[#FEF7FF] font-normal w-fit">Показать больше</Button>
+          </Link>
+        )}
       </section>
     </main>
   );

@@ -12,12 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@radix-ui/react-dialog";
-import { ArrowUpRight, MailOpen, Send, Inbox } from "lucide-react";
+import { ArrowUpRight, MailOpen, Send, Inbox, Plus } from "lucide-react";
 import { fetchDocuments } from "@/lib/slices/documentsSlice";
 import { fetchUsersInCompany } from "@/lib/slices/companySlice";
 import { RootState } from "@/lib/store";
 import { createRequest, fetchRequests } from "@/lib/slices/requestsSlice";
 import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-200 text-yellow-800",
@@ -42,6 +43,7 @@ const RequestsPage = () => {
   });
   const [selectedUserId, setSelectedUserId] = useState<number | string>("");
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | string>("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     if (userProfile?.company?.id) {
@@ -68,7 +70,21 @@ const RequestsPage = () => {
         receiverId: selectedUserId as number,
         documentId: selectedDocumentId as number,
       }) as any
-    );
+    ).then(() => {
+      // Очищаем форму после создания
+      setNewRequestData({ title: "", description: "" });
+      setSelectedUserId("");
+      setSelectedDocumentId("");
+      setShowCreateDialog(false);
+      // Обновляем список запросов
+      if (userProfile?.id) {
+        dispatch(fetchRequests(userProfile.id) as any);
+      }
+    });
+  };
+
+  const handleCreateRequestClick = () => {
+    setShowCreateDialog(true);
   };
 
   if (documentsLoading || usersLoading || requestsLoading) return <p>Загрузка...</p>;
@@ -79,13 +95,64 @@ const RequestsPage = () => {
     <div className="flex w-full flex-col p-5">
       <div className="w-full flex items-center justify-between">
         <h2 className="text-2xl font-medium py-3 leading-10 tracking-normal">Запросы</h2>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="gap-1 rounded-full flex items-center">
-              Создать запрос <ArrowUpRight/>
-            </Button>
-          </DialogTrigger>
+        <Button 
+          variant="outline" 
+          className="gap-1 rounded-full flex items-center"
+          onClick={handleCreateRequestClick}
+        >
+          Создать запрос <ArrowUpRight/>
+        </Button>
+      </div>
 
+      {requests && requests.length > 0 ? (
+        <div className="w-full flex flex-col gap-3">
+          {requests.map((item: any, idx) => {
+            const isSender = item.sender?.id === userProfile?.id;
+            return (
+              <div
+                key={idx}
+                className="p-3 w-full rounded-[20px] flex items-center bg-[#FEF7FF] justify-between hover:outline-1 hover:outline-[#79747E]/30"
+              >
+                <div className="flex flex-1 gap-3 items-center">
+                  <div
+                    className={`p-2 rounded-full ${isSender ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                    {isSender ? <Send size={18}/> : <Inbox size={18}/>}
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-medium">{item.document?.title}</h3>
+                    <p className="text-md">{item.sender?.firstName} {item.sender?.lastName}</p>
+                  </div>
+                </div>
+                <span
+                  className={`mt-1 text-xs w-fit px-2 py-1 rounded ${statusColors[item.status] || 'bg-gray-200 text-gray-800'}`}
+                >
+                  {item.status}
+                </span>
+                <Link href={`/requests/${item.id}`} className={"flex-1 flex justify-end"}>
+                  <Button variant="outline" className="gap-1 rounded-full">
+                    Открыть <MailOpen/>
+                  </Button>
+                </Link>
+              </div>
+            );
+          })}
+          
+          {/* Кнопка создания запроса в списке */}
+          <div className="p-3 w-full rounded-[20px] flex items-center bg-[#FEF7FF] justify-center hover:outline-1 hover:outline-[#79747E]/30 cursor-pointer"
+               onClick={handleCreateRequestClick}>
+            <div className="flex items-center gap-2 text-gray-500">
+              <Plus className="w-5 h-5" />
+              <span>Создать новый запрос</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <EmptyState type="requests" onCreateClick={handleCreateRequestClick} />
+      )}
+
+      {/* Dialog для создания запроса */}
+      {showCreateDialog && (
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogContent className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded p-8 w-full max-w-md">
               <DialogTitle className="text-2xl font-bold my-3">Создание запроса</DialogTitle>
@@ -148,41 +215,7 @@ const RequestsPage = () => {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
-
-      <div className="w-full flex flex-col gap-3">
-        {requests &&
-          requests.map((item: any, idx) => {
-            const isSender = item.sender?.id === userProfile?.id;
-            return (
-              <div
-                key={idx}
-                className="p-3 w-full rounded-[20px] flex items-center bg-[#FEF7FF] justify-between hover:outline-1 hover:outline-[#79747E]/30"
-              >
-                <div className="flex flex-1 gap-3 items-center">
-                  <div
-                    className={`p-2 rounded-full ${isSender ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
-                    {isSender ? <Send size={18}/> : <Inbox size={18}/>}
-                  </div>
-                  <div className="flex flex-col">
-                    <h3 className="text-lg font-medium">{item.document?.title}</h3>
-                    <p className="text-md">{item.sender?.firstName} {item.sender?.lastName}</p>
-                  </div>
-                </div>
-                <span
-                  className={`mt-1 text-xs w-fit px-2 py-1 rounded ${statusColors[item.status] || 'bg-gray-200 text-gray-800'}`}
-                >
-                  {item.status}
-                </span>
-                <Link href={`/requests/${item.id}`} className={"flex-1 flex justify-end"}>
-                  <Button variant="outline" className="gap-1 rounded-full">
-                    Открыть <MailOpen/>
-                  </Button>
-                </Link>
-              </div>
-            );
-          })}
-      </div>
+      )}
     </div>
   );
 };

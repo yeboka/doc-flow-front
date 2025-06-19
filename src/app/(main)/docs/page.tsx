@@ -4,28 +4,22 @@ import DocumentCard from "@/components/DocumentCard";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchDocuments } from "@/lib/slices/documentsSlice";
 import UploadDialog from "@/components/dialogs/UploadDialog";
-import DocumentCardSkeleton from "@/components/skeletons/DocumentCardSkeleton"; // Импортируем Skeleton
+import DocumentCardSkeleton from "@/components/skeletons/DocumentCardSkeleton";
+import EmptyState from "@/components/EmptyState";
+import CreateDocumentButton from "@/components/CreateDocumentButton";
 
 const DocsPage = () => {
   const dispatch = useAppDispatch();
   const { data: documents, loading, error } = useAppSelector((state) => state.documents);
 
-  // const [file, setFile] = useState<File | null>(null);
-
   useEffect(() => {
     dispatch(fetchDocuments());
   }, []);
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files ? e.target.files[0] : null;
-  //   setFile(file);
-  // };
-  //
-  // const handleUpload = () => {
-  //   if (file) {
-  //     console.log("Uploading file:", file);
-  //   }
-  // };
+  const handleCreateDocument = () => {
+    // UploadDialog уже имеет свой собственный Dialog, поэтому просто показываем его
+    // Кнопка создания будет открывать диалог через UploadDialog
+  };
 
   // If loading, display skeletons
   if (loading) {
@@ -55,17 +49,24 @@ const DocsPage = () => {
         <h2 className="text-2xl font-medium py-3 leading-10 tracking-normal">Твои документы</h2>
         <UploadDialog />
       </div>
-      <div className="w-full flex flex-wrap gap-3">
-        {/* Map through documents and display each in DocumentCard */}
-        {documents.map((item) => (
-          <DocumentCard
-            key={item.id}
-            id={item.id}
-            title={item.title}
-            fileUrl={item.file_url}
-          />
-        ))}
-      </div>
+      
+      {documents && documents.length > 0 ? (
+        <div className="w-full flex flex-wrap gap-3">
+          {/* Map through documents and display each in DocumentCard */}
+          {documents.map((item) => (
+            <DocumentCard
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              fileUrl={item.file_url}
+            />
+          ))}
+          {/* Кнопка создания документа в списке */}
+          <CreateDocumentButton onSuccess={() => dispatch(fetchDocuments())} />
+        </div>
+      ) : (
+        <EmptyState type="documents" onCreateClick={handleCreateDocument} />
+      )}
     </div>
   );
 };

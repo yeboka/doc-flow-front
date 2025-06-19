@@ -16,7 +16,12 @@ import API from "@/lib/axios";
 import { fetchDocuments } from "@/lib/slices/documentsSlice";
 import { useAppDispatch } from "@/lib/hooks";
 
-export default function UploadDialog({ onSuccess }: { onSuccess?: () => void }) {
+interface UploadDialogProps {
+  onSuccess?: () => void;
+  children?: React.ReactNode;
+}
+
+export default function UploadDialog({ onSuccess, children }: UploadDialogProps) {
   const dispatch = useAppDispatch();
 
   const [file, setFile] = useState<File | null>(null);
@@ -65,10 +70,12 @@ export default function UploadDialog({ onSuccess }: { onSuccess?: () => void }) 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-1 rounded-full flex items-center">
-          <UploadCloud className="w-5 h-5" />
-          Загрузить документ
-        </Button>
+        {children || (
+          <Button variant="outline" className="gap-1 rounded-full flex items-center">
+            <UploadCloud className="w-5 h-5" />
+            Загрузить документ
+          </Button>
+        )}
       </DialogTrigger>
 
       <DialogContent
